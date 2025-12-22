@@ -18,7 +18,7 @@ import { PlusIcon } from '~/components/Icons';
 const cx = classNames.bind(styles);
 
 function Header() {
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate(); 
 
     const my_user = {
         id: 1,
@@ -47,7 +47,7 @@ function Header() {
     const handleDefaultClickMenu = (itemInfo) => {
         // Handle user action
         if (itemInfo.title === 'Xem hồ sơ') {
-            navigate(`/@SunMinh🤖`, { state: my_user }); // Use navigate to programmatically redirect
+            navigate(`/@SunMinh🤖`, { state: my_user });
         }
         if (itemInfo.title === 'Đăng xuất') {
             setCurrentUser(false);

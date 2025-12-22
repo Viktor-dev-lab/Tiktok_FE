@@ -6,7 +6,7 @@ import styles from './Sidebar.module.scss';
 import Navigation from './Navigation';
 import SuggestedAccount from './SuggestedAccount'; // , { FollowedAccount }
 
-import { Scrollbars as CustomScrollbar } from 'react-custom-scrollbars';
+import { Scrollbars as CustomScrollbar } from 'react-custom-scrollbars-2';
 // import LoginNotify from './LoginNotify';
 import Discover from './Discover';
 import BorderTopContainer from '~/components/BorderTopContainer';

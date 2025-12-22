@@ -3,43 +3,50 @@ import ShowAccount from '~/components/ShowAccount';
 import configs from '~/configs';
 import { accountService } from '~/services';
 
-function SuggestedAccount() {
-    const [accounts, setAccounts] = useState([]);
-    const [seeAll, setSeeAll] = useState(false);
+function FollowedAccount() {
+    const [accountList, setAccountList] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [seeMore, setSeeMore] = useState(false);
 
     // Get config
-    const { totalLoadSuggested: total, defaultShowSuggested: show } = configs.accounts;
+    const { defaultShowFollowed: numOfAccount } = configs.accounts;
 
-    const currentItems = seeAll ? accounts : accounts.slice(0, show);
-    const btnTitle = seeAll ? 'Ẩn bớt' : 'Xem thêm';
-
-    const options = {
-        btnTitle,
-        hoverActivate: true,
-    };
+    // Hiển thị tất cả hoặc chỉ số lượng ban đầu
+    const currentList = seeMore ? accountList : accountList.slice(0, numOfAccount);
+    const btnTitle = seeMore ? 'Ẩn bớt' : 'Xem thêm';
+    const showButton = accountList.length > numOfAccount; 
 
     useEffect(() => {
         const fetchAPI = async () => {
-            const result = await accountService.getSuggestedAccount(total);
-
-            setAccounts(result);
+            setLoading(true);
+            const result = await accountService.getSuggestedAccount();
+            setAccountList(result);
+            setLoading(false);
         };
 
         fetchAPI();
-    }, [total]);
+    }, []);
 
-    const handleToggleSeeAll = () => {
-        setSeeAll(!seeAll);
+    const handleShowHide = () => {
+        setSeeMore(!seeMore);
+    };
+
+    const options = {
+        btnTitle,
+        loading,
+        showButton, // Truyền thêm prop này để ẩn/hiện nút
     };
 
     return (
-        <ShowAccount
-            title="Đề xuất cho bạn"
-            accountItems={currentItems}
-            onClick={handleToggleSeeAll}
-            {...options}
-        />
+        accountList.length > 0 && (
+            <ShowAccount 
+                title="Các tài khoản được đề xuất" 
+                accountItems={currentList} 
+                onClick={handleShowHide} 
+                {...options} 
+            />
+        )
     );
 }
 
-export default memo(SuggestedAccount);
+export default memo(FollowedAccount);
