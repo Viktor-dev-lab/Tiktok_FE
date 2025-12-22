@@ -10,6 +10,8 @@ import Profile from '~/pages/Profile';
 import Live from '~/pages/Live';
 import Search from '~/pages/Search';
 import HomePhone from '~/pages/PhoneUI';
+import Messages from '~/pages/Messages';
+import ChatDetail from '~/pages/ChatDetail';
 
 
 
@@ -24,6 +26,8 @@ const publicRoutes = [
     { path: configs.routes.profile, component: Profile },
     { path: configs.routes.upload, component: Upload, layout: null },
     { path: configs.routes.live, component: Live },
+    { path: configs.routes.messages, component: Messages },
+    { path: configs.routes.chatDetail, component: ChatDetail },
 ];
 
 const privateRoutes = [];

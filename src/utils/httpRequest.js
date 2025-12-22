@@ -13,5 +13,26 @@ export const get = async (path, options = {}) => {
         return response.data;
     } catch (err) {
         console.log('Failed to get: ', err);
+        return err.response;
+    }
+};
+
+export const post = async (path, data = {}, options = {}) => {
+    try {
+        const response = await request.post(path, data, options);
+        return response.data;
+    } catch (err) {
+        console.log('Failed to post: ', err);
+        return err.response;
+    }
+};
+
+export const put = async (path, data = {}, options = {}) => {
+    try {
+        const response = await request.put(path, data, options);
+        return response.data;
+    } catch (err) {
+        console.log('Failed to put: ', err);
+        return err.response;
     }
 };

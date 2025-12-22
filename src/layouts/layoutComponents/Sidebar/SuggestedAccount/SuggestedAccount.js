@@ -20,7 +20,7 @@ function FollowedAccount() {
         const fetchAPI = async () => {
             setLoading(true);
             const result = await accountService.getSuggestedAccount();
-            setAccountList(result);
+            setAccountList(Array.isArray(result) ? result : []);
             setLoading(false);
         };
 

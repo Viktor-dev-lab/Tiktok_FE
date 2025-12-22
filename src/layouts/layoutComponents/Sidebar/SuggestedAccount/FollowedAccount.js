@@ -21,7 +21,11 @@ function FollowedAccount() {
             setLoading(true);
             const result = await accountService.getSuggestedAccount(numOfAccount, page);
 
-            result.length !== 0 ? setAccountList([...accountList, ...result]) : setFulled(true);
+            if (Array.isArray(result) && result.length !== 0) {
+                setAccountList([...accountList, ...result]);
+            } else {
+                setFulled(true);
+            }
             setLoading(false);
         };
 

@@ -37,7 +37,7 @@ function Search() {
 
             const searchResult = await searchService.search(debouncedValue);
 
-            setSearchResult(searchResult);
+            setSearchResult(searchResult || []);
             setLoading(false);
         };
 
@@ -70,7 +70,7 @@ function Search() {
                     </div>
                 </Link>
                 <div className={cx('search-result__title')}>Tài khoản</div>
-                {searchResult.map((accountItem, index) => (
+                {Array.isArray(searchResult) && searchResult.map((accountItem, index) => (
                     <SeachAccountItem key={index} accountInfo={accountItem} onClick={handleClearInput} />
                 ))}
                 <Link to={`/search/user/${searchInput}`} state={searchInput} onClick={handleClearInput}>
