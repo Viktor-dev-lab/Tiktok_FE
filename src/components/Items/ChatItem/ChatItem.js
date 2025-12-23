@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
 
 import styles from './ChatItem.module.scss';
@@ -10,7 +9,7 @@ import ShowTick from '~/components/ShowTick';
 const cx = classNames.bind(styles);
 
 function ChatItem({ chatInfo }) {
-    const { id, user, lastMessage, unreadCount } = chatInfo;
+    const { user, lastMessage, unreadCount } = chatInfo;
 
     // Format thời gian
     const formatTime = (timestamp) => {
@@ -35,7 +34,7 @@ function ChatItem({ chatInfo }) {
     };
 
     return (
-        <Link to={`/messages/${id}`} className={cx('wrapper', { unread: unreadCount > 0 })}>
+        <div className={cx('wrapper', { unread: unreadCount > 0 })}>
             <div className={cx('avatar-wrapper')}>
                 <Img className={cx('avatar')} src={user.avatar} alt={user.fullName} />
                 {unreadCount > 0 && <div className={cx('online-dot')}></div>}
@@ -57,7 +56,7 @@ function ChatItem({ chatInfo }) {
                     {unreadCount > 0 && <span className={cx('unread-badge')}>{unreadCount}</span>}
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }
 
