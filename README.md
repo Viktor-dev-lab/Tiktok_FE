@@ -78,3 +78,41 @@ This project is licensed under the [MIT License](https://github.com/MinhNguyenDS
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
+
+## Cách sử dụng Auth
+Trong component bất kỳ:
+javascriptimport { useAuth } from '~/contexts/AuthContext';
+
+function MyComponent() {
+    const { currentUser, loading, logout } = useAuth();
+    
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+    
+    return (
+        <div>
+            {currentUser ? (
+                <div>
+                    <p>Xin chào, {currentUser.nickname}!</p>
+                    <button onClick={logout}>Đăng xuất</button>
+                </div>
+            ) : (
+                <p>Chưa đăng nhập</p>
+            )}
+        </div>
+    );
+}
+Gọi API với authentication:
+javascriptimport { authenticatedFetch } from '~/utils/authUtils';
+
+async function fetchUserData() {
+    try {
+        const response = await authenticatedFetch('/users/profile');
+        const data = await response.json();
+        console.log(data);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}

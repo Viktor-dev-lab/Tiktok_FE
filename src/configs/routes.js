@@ -8,6 +8,7 @@ const routes = {
     search: '/search/user/:value',
     upload: '/upload',
     live: '/live',
+    comment: '/video/:videoId/comments',
 };
 
 export default routes;

@@ -4,17 +4,24 @@
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    background-color: #000;
+    aspect-ratio: 9 / 16; // Tỷ lệ cố định 720x1280
+    width: 100%;
+    max-width: 720px;
+    height: auto;
 
     &:hover > .control {
         opacity: 1;
     }
 
     &.vertical {
-        height: calc(450px + (100vw - 768px) / 1152 * 100);
+        // Giữ tỷ lệ 9:16
+        aspect-ratio: 9 / 16;
     }
 
     &.horizontal {
-        width: calc(450px + (100vw - 768px) / 1152 * 100);
+        // Giữ tỷ lệ 9:16
+        aspect-ratio: 9 / 16;
     }
 }
 .default-space {
@@ -23,7 +30,7 @@
     top: 0;
     height: 100%;
     width: 100%;
-    background-color: var(--default-background-media);
+    background-color: #000; // Màu đen cho phần dư
     z-index: 1;
 }
 .video-loading {
@@ -37,7 +44,8 @@
     height: 100%;
     width: 100%;
     min-width: 271px;
-    object-fit: cover;
+    object-fit: contain; // Hiển thị toàn bộ video, không crop
+    background-color: #000; // Màu đen cho phần dư
 }
 
 .thumb {
@@ -168,20 +176,16 @@
 
 @media (max-width: 767px) {
     .player-space {
-        &.vertical {
-            height: calc(380px + (100vw - 480px) / 288 * 20);
-        }
-        &.horizontal {
-            width: calc(380px + ((100vw - 480px) / 288) * 20);
-        }
+        // Giữ tỷ lệ 9:16 trên mobile
+        aspect-ratio: 9 / 16;
+        max-width: 100%;
     }
 }
 
 @media (max-width: 479px) {
     .player-space {
-        &.vertical {
-            height: calc(100vw - 32px - 60px);
-            width: auto;
-        }
+        // Giữ tỷ lệ 9:16 trên mobile nhỏ
+        aspect-ratio: 9 / 16;
+        max-width: 100%;
     }
 }
