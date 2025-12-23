@@ -74,10 +74,10 @@ function Header() {
                             <Button to={configs.routes.upload} className={cx('upload-btn')}>
                                 <PlusIcon className={cx('upload-icon')} /> Tải lên
                             </Button>
-                            <Tippy className={cx('user-action')} content="Hộp thư">
-                                <button className={cx('user-action-icon')}>
+                            <Tippy className={cx('user-action')} content="Tin nhắn">
+                                <button className={cx('user-action-icon', 'message-icon')} onClick={() => navigate(configs.routes.messages)}>
                                     <SvgIcon icon={iconMessage} size={32} />
-                                    <span className={cx('notify')}>9</span>
+                                    <span className={cx('notify')}>6</span>
                                 </button>
                             </Tippy>
                         </>

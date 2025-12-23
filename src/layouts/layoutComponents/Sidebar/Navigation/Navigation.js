@@ -14,6 +14,8 @@ import {
     iconLive,
     iconLiveRegular,
     iconMyProfile,
+    iconMessage,
+    iconMessageActive,
 } from '~/components/SvgIcon/iconsRepo';
 import config from '~/configs';
 import assetImages from '~/assets/images';
@@ -65,6 +67,12 @@ function Navigation() {
                 icon={<SvgIcon icon={iconLiveRegular} />}
                 iconActive={<SvgIcon icon={iconLive} />}
                 to={config.routes.live}
+            />
+            <NavigationItem
+                title="Tin nhắn"
+                icon={<SvgIcon icon={iconMessage} />}
+                iconActive={<SvgIcon icon={iconMessageActive} />}
+                to={config.routes.messages}
             />
             <NavigationItem
                 title="Hồ sơ"
