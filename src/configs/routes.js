@@ -8,8 +8,10 @@ const routes = {
     search: '/search/user/:value',
     upload: '/upload',
     live: '/live',
+    comment: '/video/:videoId/comments',
     messages: '/messages',
     chatDetail: '/messages/:chatId',
+
 };
 
 export default routes;

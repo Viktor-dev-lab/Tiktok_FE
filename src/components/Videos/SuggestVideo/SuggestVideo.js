@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import PropTypes from 'prop-types';
-import { forwardRef, memo, useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { forwardRef, memo, useContext, useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 
 import styles from './SuggestVideo.module.scss';
@@ -14,16 +14,56 @@ import AccountPreview from '~/components/Items/AccountItem/AccountPreview';
 import SuggestVideoControl from './SuggestVideoControl';
 import VideoShare from '~/components/Shares/VideoShare';
 import { ModalContext } from '~/components/ModalProvider';
+import useWebSocket from '~/hooks/useWebSocket';
+import { useAuth } from '~/Context/AuthContext';
 
 const cx = classNames.bind(styles);
 
 const SuggestVideo = forwardRef(({ videoId, videoInfo, isInView }, REF) => {
-    const [liked, setLiked] = useState(false);
-    const [likesCountState, setLikesCountState] = useState(videoInfo.likes_count);
+    const navigate = useNavigate();
+    const { currentUser } = useAuth();
+    const { likeVideo, unlikeVideo } = useWebSocket();
+    
+    const [liked, setLiked] = useState(videoInfo.is_liked || false);
+    const [likesCountState, setLikesCountState] = useState(videoInfo.likes_count || 0);
+    const [isLiking, setIsLiking] = useState(false);
 
-    const handleLikeClick = () => {
+    const handleLikeClick = async () => {
+        if (isLiking || !currentUser?.id) {
+            return;
+        }
+
+        setIsLiking(true);
+        const wasLiked = liked;
+        
+        // Optimistic update
         setLiked(!liked);
         setLikesCountState((prevCount) => (liked ? prevCount - 1 : prevCount + 1));
+
+        try {
+            // Backend dùng cùng endpoint cho like/unlike (toggle)
+            const response = await likeVideo(videoInfo.id, currentUser.id);
+            
+            // Cập nhật từ response của server
+            if (response && response.data) {
+                const video = response.data;
+                setLiked(video.isLiked || video.is_liked || false);
+                setLikesCountState(video.likesCount || video.likes_count || 0);
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            // Revert optimistic update nếu có lỗi
+            setLiked(wasLiked);
+            setLikesCountState((prevCount) => (wasLiked ? prevCount + 1 : prevCount - 1));
+        } finally {
+            setIsLiking(false);
+        }
+    };
+
+    const handleCommentClick = () => {
+        navigate(`/video/${videoInfo.id}/comments`, {
+            state: { videoInfo },
+        });
     };
 
     const context = useContext(ModalContext);
@@ -107,7 +147,7 @@ const SuggestVideo = forwardRef(({ videoId, videoInfo, isInView }, REF) => {
                             <strong className={cx('item-count')}>{likesCountState}</strong>
                         </label>
                         <label className={cx('interactive-item')}>
-                            <button className={cx('item-icon')} onClick={context.handleShowModal}>
+                            <button className={cx('item-icon')} onClick={handleCommentClick}>
                                 <SvgIcon icon={iconComment} />
                             </button>
                             <strong className={cx('item-count')}>{commentsCount}</strong>

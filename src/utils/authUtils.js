@@ -25,61 +25,57 @@ export const isAuthenticated = () => {
 
 // Lấy thông tin user hiện tại từ API
 export const getCurrentUser = async () => {
-    const token = getAuthToken();
-    
-    if (!token) {
-        return null;
-    }
+    const user = localStorage.getItem('user');
+
+    if (!user || user === 'undefined') return null;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/me`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            const userData = await response.json();
-            return userData;
-        } else {
-            // Token không hợp lệ
-            removeAuthToken();
-            return null;
-        }
-    } catch (error) {
-        console.error('Error getting current user:', error);
+        return JSON.parse(user);
+    } catch (e) {
+        console.error('Invalid user JSON:', user);
         return null;
     }
 };
+
 
 // Login function
 export const login = async (email, password) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        const res = await fetch('http://localhost:8080/api/auth/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
-        const data = await response.json();
+        const result = await res.json();
 
-        if (response.ok) {
-            if (data.token) {
-                setAuthToken(data.token);
-            }
-            return { success: true, data };
-        } else {
-            return { success: false, message: data.message || 'Đăng nhập thất bại!' };
+        if (!res.ok || !result.success) {
+            return {
+                success: false,
+                message: result.message || 'Đăng nhập thất bại'
+            };
         }
-    } catch (error) {
-        console.error('Login error:', error);
-        return { success: false, message: 'Lỗi kết nối đến server!' };
+
+        const { accessToken, refreshToken, user } = result.data;
+
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        return {
+            success: true,
+            user
+        };
+    } catch (err) {
+        console.error('Login error:', err);
+        return {
+            success: false,
+            message: 'Lỗi kết nối server'
+        };
     }
 };
+
+
 
 // Register function
 export const register = async (userData) => {

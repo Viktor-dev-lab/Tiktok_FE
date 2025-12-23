@@ -9,8 +9,14 @@ const request = axios.create({
 
 export const get = async (path, options = {}) => {
     try {
-        const response = await request.get(path, options);
-        return response.data;
+        const response = await  request.get(path, options);
+        let result = null;
+        try {
+            result = await response.json();
+        } catch (err) {
+            result = null;
+        }
+        return result;
     } catch (err) {
         console.log('Failed to get: ', err);
         return err.response;

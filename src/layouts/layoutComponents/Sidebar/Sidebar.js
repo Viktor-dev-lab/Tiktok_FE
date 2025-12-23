@@ -133,7 +133,7 @@ function Sidebar() {
                             <button className={cx('link-item')}>Thêm</button>
 
                             <p>
-                                <span className={cx('more')}>© 2024 TikTok - Clone by MinhNguyenDS</span>
+                                <span className={cx('more')}>© 2025 TikTok</span>
                             </p>
                         </BorderTopContainer>}
                     </div>

@@ -6,10 +6,13 @@ import styles from './ModalForm.module.scss'
 import images from '~/assets/images'
 import Button from '~/components/Button'
 import { Link } from 'react-router-dom'
+import { login as authLogin, register as authRegister } from '~/utils/authUtils'
+import { useAuth } from '~/Context/AuthContext'
 
 const cx = classNames.bind(styles)
 
 function ModalForm({ onHide }) {
+    const { login } = useAuth();
     const [formLoginState, setFormLoginState] = useState('login')
     const [filteredForm, setFilteredForm] = useState([])
     const [showEmailForm, setShowEmailForm] = useState(false)
@@ -121,37 +124,22 @@ function ModalForm({ onHide }) {
         setError('')
         setSuccess('')
 
-        try {
-            const response = await fetch('http://localhost:8080/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(loginData)
-            })
+        const result = await authLogin(loginData.email, loginData.password)
 
-            const data = await response.json()
-
-            if (response.ok) {
-                setSuccess('Đăng nhập thành công!')
-                // Lưu token vào localStorage nếu có
-                if (data.token) {
-                    localStorage.setItem('token', data.token)
-                }
-                // Đóng modal sau 1 giây
-                setTimeout(() => {
-                    onHide()
-                    window.location.reload() // Reload trang để cập nhật trạng thái đăng nhập
-                }, 1000)
-            } else {
-                setError(data.message || 'Đăng nhập thất bại!')
-            }
-        } catch (err) {
-            setError('Lỗi kết nối đến server!')
-            console.error('Login error:', err)
-        } finally {
-            setLoading(false)
+        if (result.success) {
+            setSuccess('Đăng nhập thành công!')
+            console.log(result.user);
+            login(result.user); 
+            onHide();
+            // Đóng modal sau 1 giây
+            setTimeout(() => {
+                onHide()
+            }, 1000)
+        } else {
+            setError(result.message)
         }
+        
+        setLoading(false)
     }
 
     const handleRegisterSubmit = async (e) => {
@@ -160,33 +148,20 @@ function ModalForm({ onHide }) {
         setError('')
         setSuccess('')
 
-        try {
-            const response = await fetch('http://localhost:8080/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(registerData)
-            })
+        const result = await authRegister(registerData)
 
-            const data = await response.json()
-
-            if (response.ok) {
-                setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
-                // Chuyển sang form đăng nhập sau 2 giây
-                setTimeout(() => {
-                    setFormLoginState('login')
-                    setShowEmailForm(false)
-                }, 2000)
-            } else {
-                setError(data.message || 'Đăng ký thất bại!')
-            }
-        } catch (err) {
-            setError('Lỗi kết nối đến server!')
-            console.error('Register error:', err)
-        } finally {
-            setLoading(false)
+        if (result.success) {
+            setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
+            // Chuyển sang form đăng nhập sau 2 giây
+            setTimeout(() => {
+                setFormLoginState('login')
+                setShowEmailForm(false)
+            }, 2000)
+        } else {
+            setError(result.message)
         }
+        
+        setLoading(false)
     }
 
     const handleLoginChange = (e) => {
