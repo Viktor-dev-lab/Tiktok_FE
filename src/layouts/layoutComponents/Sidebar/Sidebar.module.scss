@@ -1,6 +1,11 @@
 .wrapper {
     flex-shrink: 0;
     width: 300px;
+    transition: width 0.2s ease-in-out;
+
+    &.compact {
+        width: 72px;
+    }
 }
 
 .inner-fixed {
@@ -8,11 +13,19 @@
     top: var(--header-height);
     bottom: 0;
     width: inherit;
+    transition: width 0.2s ease-in-out;
+
+    &.compact {
+        border-right: 1px solid var(--background-gray-color4);
+    }
 }
 
 .content {
     padding: 20px 8px 26px;
-    // background-color: #ccc;
+
+    .compact & {
+        padding: 12px 4px 26px;
+    }
 }
 
 // Customize React-Custom-Scrollbars

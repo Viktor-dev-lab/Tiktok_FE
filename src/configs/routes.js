@@ -9,6 +9,9 @@ const routes = {
     upload: '/upload',
     live: '/live',
     comment: '/video/:videoId/comments',
+    messages: '/messages',
+    chatDetail: '/messages/:chatId',
+
 };
 
 export default routes;

@@ -132,6 +132,23 @@ function Header() {
                         <div className={cx('notification-empty')}>
                             <p>Chưa có thông báo nào</p>
                         </div>
+                {/* Search Container */}
+                <Search />
+
+                {/* Action Container */}
+                <div className={cx('action-container')}>
+                    {currentUser ? (
+                        <>
+                            <Button to={configs.routes.upload} className={cx('upload-btn')}>
+                                <PlusIcon className={cx('upload-icon')} /> Tải lên
+                            </Button>
+                            <Tippy className={cx('user-action')} content="Tin nhắn">
+                                <button className={cx('user-action-icon', 'message-icon')} onClick={() => navigate(configs.routes.messages)}>
+                                    <SvgIcon icon={iconMessage} size={32} />
+                                    <span className={cx('notify')}>6</span>
+                                </button>
+                            </Tippy>
+                        </>
                     ) : (
                         notificationsList.map((notification) => (
                             <div

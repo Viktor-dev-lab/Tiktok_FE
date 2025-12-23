@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import classNames from 'classnames/bind';
 
 import styles from './Sidebar.module.scss';
@@ -14,12 +15,29 @@ import BorderTopContainer from '~/components/BorderTopContainer';
 const cx = classNames.bind(styles);
 
 function Sidebar() {
+    const location = useLocation();
     const [hideScrollbar, setHideScrollbar] = useState(true);
     const [openSections, setOpenSections] = useState({
         company: false,
         program: false,
         terms: false,
     });
+
+    // Check if current page is Messages
+    const isMessagesPage = location.pathname.startsWith('/messages');
+
+    // Add/remove class to body for smooth transition
+    useEffect(() => {
+        if (isMessagesPage) {
+            document.body.classList.add('sidebar-compact');
+        } else {
+            document.body.classList.remove('sidebar-compact');
+        }
+
+        return () => {
+            document.body.classList.remove('sidebar-compact');
+        };
+    }, [isMessagesPage]);
 
     const customScrollbar = (className) => {
         return (props) => <div className={cx(className)} {...props}></div>;
@@ -32,8 +50,8 @@ function Sidebar() {
         }));
     };
     return (
-        <div className={cx('wrapper')}>
-            <div className={cx('inner-fixed')}>
+        <div className={cx('wrapper', { compact: isMessagesPage })}>
+            <div className={cx('inner-fixed', { compact: isMessagesPage })}>
                 <CustomScrollbar
                     hideTracksWhenNotNeeded
                     autoHide={hideScrollbar}
@@ -50,16 +68,16 @@ function Sidebar() {
                         {/* {!currentUser && <LoginNotify />} */}
 
                         {/* Sugges Account */}
-                        <SuggestedAccount />
+                        {!isMessagesPage && <SuggestedAccount />}
 
                         {/* Followed */}
                         {/* <FollowedAccount /> */}
 
                         {/* Discover */}
-                        <Discover />
+                        {!isMessagesPage && <Discover />}
 
                         {/* Footer */}
-                        <BorderTopContainer className={cx('footer-container')}>
+                        {!isMessagesPage && <BorderTopContainer className={cx('footer-container')}>
                             {/* Company Section */}
                             <div style={{ marginTop: '-10px' }}>
                                 <button className={cx('link-list')} onClick={() => toggleSection('company')}>
@@ -117,7 +135,7 @@ function Sidebar() {
                             <p>
                                 <span className={cx('more')}>© 2025 TikTok</span>
                             </p>
-                        </BorderTopContainer>
+                        </BorderTopContainer>}
                     </div>
                 </CustomScrollbar>
             </div>
