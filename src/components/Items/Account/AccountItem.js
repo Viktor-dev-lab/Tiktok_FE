@@ -16,8 +16,8 @@ function AccountItem({ accountInfo, hoverActivate = false, customTippy, state })
     const {
         avatar: avatarUrl,
         nickname : userName,
-        first_name: firstName,
-        last_name: lastName,
+        firstName,
+        lastName,
         tick,
         followers_count: followerCount,
         likes_count: likeCount,

@@ -1,5 +1,7 @@
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+const API_BASE_URL = process.env.REACT_APP_API_BE;
+
 
 if (typeof window !== 'undefined') {
     Client.debug = () => {};
@@ -28,8 +30,8 @@ class WebSocketService {
         try {
             const token = localStorage.getItem('token');
             const wsUrl = token 
-                ? `http://localhost:8080/ws?token=${encodeURIComponent(token)}`
-                : 'http://localhost:8080/ws';
+                ? `${API_BASE_URL}/ws?token=${encodeURIComponent(token)}`
+                : `${API_BASE_URL}/ws`;
             
             this.stompClient = new Client({
                 webSocketFactory: () => new SockJS(wsUrl),

@@ -9,17 +9,12 @@ const request = axios.create({
 
 export const get = async (path, options = {}) => {
     try {
-        const response = await  request.get(path, options);
-        let result = null;
-        try {
-            result = await response.json();
-        } catch (err) {
-            result = null;
-        }
-        return result;
+        const response = await request.get(path, options);
+        // Axios response đã có sẵn data, không cần .json()
+        return response.data;
     } catch (err) {
         console.log('Failed to get: ', err);
-        return err.response;
+        return null;
     }
 };
 
@@ -29,7 +24,7 @@ export const post = async (path, data = {}, options = {}) => {
         return response.data;
     } catch (err) {
         console.log('Failed to post: ', err);
-        return err.response;
+        return null;
     }
 };
 
@@ -39,6 +34,18 @@ export const put = async (path, data = {}, options = {}) => {
         return response.data;
     } catch (err) {
         console.log('Failed to put: ', err);
-        return err.response;
+        return null;
     }
 };
+
+export const del = async (path, options = {}) => {
+    try {
+        const response = await request.delete(path, options);
+        return response.data;
+    } catch (err) {
+        console.log('Failed to delete: ', err);
+        return null;
+    }
+};
+
+export default request;
