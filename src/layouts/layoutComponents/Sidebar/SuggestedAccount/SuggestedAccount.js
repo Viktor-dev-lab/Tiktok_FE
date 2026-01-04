@@ -19,11 +19,16 @@ function FollowedAccount() {
     useEffect(() => {
         const fetchAPI = async () => {
             setLoading(true);
-            const result = await accountService.getSuggestedAccount();
+            let result = null;
+            try {
+                result = await accountService.getSuggestedAccount();
+            } catch (e) {
+                result = [];
+            }
             setAccountList(Array.isArray(result) ? result : []);
             setLoading(false);
         };
-
+    
         fetchAPI();
     }, []);
 
@@ -34,7 +39,7 @@ function FollowedAccount() {
     const options = {
         btnTitle,
         loading,
-        showButton, // Truyền thêm prop này để ẩn/hiện nút
+        showButton, 
     };
 
     return (

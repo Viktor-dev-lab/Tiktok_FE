@@ -16,7 +16,7 @@ import { searchService } from '~/services';
 const cx = classNames.bind(styles);
 
 function Search() {
-    const [searchInput, setSearchInput] = useState('Minh');
+    const [searchInput, setSearchInput] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [searchResult, setSearchResult] = useState([]);
     const [loading, setLoading] = useState(false);
