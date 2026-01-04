@@ -6,72 +6,208 @@ import ChatItem from '~/components/Items/ChatItem';
 import MessageBubble from '~/components/MessageBubble';
 import Img from '~/components/Img';
 import ShowTick from '~/components/ShowTick';
-import { chatListData, chatDetailData, currentUser } from '~/mockData/chatData';
 import SvgIcon from '~/components/SvgIcon';
-import { iconSearch, iconLoading, iconSend, iconEmojiSmile } from '~/components/SvgIcon/iconsRepo';
+import {
+    iconSearch,
+    iconLoading,
+    iconSend,
+    iconEmojiSmile,
+} from '~/components/SvgIcon/iconsRepo';
+
+import {
+    getChatList,
+    getChatDetail,
+    sendMessage,
+    markMessagesAsRead,
+} from '~/services/chatService';
+
+import { useAuth } from '~/Context/AuthContext';
+import websocketService from '~/services/websocketService';
 
 const cx = classNames.bind(styles);
 
 function Messages() {
+    const { currentUser, loading: authLoading } = useAuth();
+
     const [chatList, setChatList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchValue, setSearchValue] = useState('');
     const [selectedChatId, setSelectedChatId] = useState(null);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
+
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
+    /* ================= WEBSOCKET SETUP ================= */
     useEffect(() => {
-        // Giả lập việc fetch data từ API
+        if (!currentUser?.id) return;
+
+        websocketService.connect(
+            currentUser.id,
+            () => console.log('WebSocket connected'),
+            (error) => console.error('WebSocket error:', error)
+        );
+
+        const handleNewMessage = (event) => {
+            const message = event.detail;
+            
+            setMessages(prev => {
+                const selectedChat = chatList.find(c => c.id === selectedChatId);
+                if (!selectedChat) return prev;
+                
+                if (message.senderId === selectedChat.user.id || 
+                    message.receiverId === selectedChat.user.id) {
+                    return [...prev, message];
+                }
+                return prev;
+            });
+
+            if (message.senderId !== currentUser.id) {
+                const selectedChat = chatList.find(c => c.id === selectedChatId);
+                if (selectedChat && message.senderId === selectedChat.user.id) {
+                    markMessagesAsRead(currentUser.id, selectedChat.user.id);
+                }
+            }
+        };
+
+        const handleChatListUpdate = (event) => {
+            const chatItem = event.detail;
+            
+            setChatList(prev => {
+                const index = prev.findIndex(item => item.user.id === chatItem.user.id);
+                if (index !== -1) {
+                    const updated = [...prev];
+                    updated[index] = chatItem;
+                    updated.sort((a, b) => 
+                        new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
+                    );
+                    return updated;
+                }
+                return [chatItem, ...prev];
+            });
+        };
+
+        window.addEventListener('websocketMessage', handleNewMessage);
+        window.addEventListener('websocketChatList', handleChatListUpdate);
+
+        return () => {
+            window.removeEventListener('websocketMessage', handleNewMessage);
+            window.removeEventListener('websocketChatList', handleChatListUpdate);
+            websocketService.disconnect();
+        };
+    }, [currentUser?.id, selectedChatId, chatList]);
+
+    /* ================= FETCH CHAT LIST ================= */
+    useEffect(() => {
+        if (!currentUser?.id) return;
+
         const fetchChatList = async () => {
-            setLoading(true);
-            // Giả lập delay network
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            setChatList(chatListData);
-            setLoading(false);
+            try {
+                setLoading(true);
+                const res = await getChatList(currentUser.id);
+
+                setChatList(
+                    Array.isArray(res?.data?.data)
+                        ? res.data.data
+                        : []
+                );
+            } catch (error) {
+                console.error('Fetch chat list error:', error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchChatList();
-    }, []);
+    }, [currentUser?.id]);
 
-    // Load messages khi chọn chat
+    /* ================= FETCH CHAT DETAIL ================= */
     useEffect(() => {
-        if (selectedChatId) {
-            const messagesData = chatDetailData[selectedChatId] || [];
-            setMessages(messagesData);
-        }
-    }, [selectedChatId]);
+        if (!selectedChatId || !currentUser?.id) return;
 
-    // Auto scroll to bottom khi có tin nhắn mới
+        const selectedChat = chatList.find(
+            c => c.id === selectedChatId
+        );
+        if (!selectedChat) return;
+
+        const fetchChatDetail = async () => {
+            try {
+                const res = await getChatDetail(
+                    currentUser.id,
+                    selectedChat.user.id
+                );
+
+                const data = res?.data?.data;
+                setMessages(
+                    Array.isArray(data?.messages)
+                        ? data.messages
+                        : []
+                );
+
+                await markMessagesAsRead(
+                    currentUser.id,
+                    selectedChat.user.id
+                );
+            } catch (error) {
+                console.error('Fetch chat detail error:', error);
+            }
+        };
+
+        fetchChatDetail();
+    }, [selectedChatId, chatList, currentUser?.id]);
+
+    /* ================= AUTO SCROLL ================= */
     useEffect(() => {
-        scrollToBottom();
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
+    /* ================= HANDLERS ================= */
     const handleSelectChat = (chatId) => {
         setSelectedChatId(chatId);
     };
 
-    const handleSendMessage = () => {
-        if (!inputValue.trim() || !selectedChatId) return;
+    const handleSendMessage = async () => {
+        if (!inputValue.trim() || !selectedChatId || !currentUser?.id) return;
 
-        const selectedChat = chatList.find((c) => c.id === selectedChatId);
-        const newMessage = {
-            id: messages.length + 1,
+        const selectedChat = chatList.find(
+            c => c.id === selectedChatId
+        );
+        if (!selectedChat) return;
+
+        const tempMessage = {
+            id: Date.now(),
+            content: inputValue,
             senderId: currentUser.id,
             receiverId: selectedChat.user.id,
-            content: inputValue,
             createdAt: new Date().toISOString(),
-            isRead: false,
+            status: 'SENDING'
         };
 
-        setMessages([...messages, newMessage]);
+        setMessages(prev => [...prev, tempMessage]);
         setInputValue('');
         inputRef.current?.focus();
+
+        try {
+            await sendMessage(
+                currentUser.id,
+                selectedChat.user.id,
+                inputValue
+            );
+
+            setMessages(prev => 
+                prev.filter(msg => msg.id !== tempMessage.id)
+            );
+        } catch (error) {
+            console.error('Send message error:', error);
+            setMessages(prev => 
+                prev.map(msg => 
+                    msg.id === tempMessage.id 
+                        ? { ...msg, status: 'FAILED' }
+                        : msg
+                )
+            );
+        }
     };
 
     const handleKeyPress = (e) => {
@@ -81,16 +217,33 @@ function Messages() {
         }
     };
 
-    // Lọc danh sách chat theo search
-    const filteredChatList = chatList.filter((chat) =>
-        chat.user.fullName.toLowerCase().includes(searchValue.toLowerCase()),
+    /* ================= FILTER ================= */
+    const filteredChatList = chatList.filter(chat =>
+        chat.user.fullName
+            .toLowerCase()
+            .includes(searchValue.toLowerCase())
     );
 
-    const selectedChat = chatList.find((c) => c.id === selectedChatId);
+    const selectedChat = chatList.find(
+        c => c.id === selectedChatId
+    );
 
+    /* ================= AUTH LOADING ================= */
+    if (authLoading) {
+        return (
+            <div className={cx('loading')}>
+                <SvgIcon icon={iconLoading} size={40} />
+            </div>
+        );
+    }
+
+    if (!currentUser) {
+        return null;
+    }
+
+    /* ================= UI ================= */
     return (
         <div className={cx('wrapper')}>
-            {/* Left sidebar - Chat List */}
             <div className={cx('sidebar')}>
                 <div className={cx('header')}>
                     <h2 className={cx('title')}>Tin nhắn</h2>
@@ -109,15 +262,21 @@ function Messages() {
                 <div className={cx('chat-list')}>
                     {loading ? (
                         <div className={cx('loading')}>
-                            <SvgIcon icon={iconLoading} size={40} className={cx('loading-icon')} />
+                            <SvgIcon
+                                icon={iconLoading}
+                                size={40}
+                                className={cx('loading-icon')}
+                            />
                             <p>Đang tải tin nhắn...</p>
                         </div>
                     ) : filteredChatList.length > 0 ? (
-                        filteredChatList.map((chat) => (
+                        filteredChatList.map(chat => (
                             <div
                                 key={chat.id}
                                 onClick={() => handleSelectChat(chat.id)}
-                                className={cx('chat-item-wrapper', { active: chat.id === selectedChatId })}
+                                className={cx('chat-item-wrapper', {
+                                    active: chat.id === selectedChatId,
+                                })}
                             >
                                 <ChatItem chatInfo={chat} />
                             </div>
@@ -130,11 +289,9 @@ function Messages() {
                 </div>
             </div>
 
-            {/* Right panel - Chat Detail */}
             <div className={cx('chat-panel')}>
                 {selectedChat ? (
                     <>
-                        {/* Header */}
                         <div className={cx('chat-header')}>
                             <div className={cx('user-info')}>
                                 <Img
@@ -145,31 +302,38 @@ function Messages() {
                                 <div className={cx('user-details')}>
                                     <h3 className={cx('username')}>
                                         {selectedChat.user.fullName}
-                                        {selectedChat.user.isVerified && <ShowTick tick={true} />}
+                                        {selectedChat.user.isVerified && (
+                                            <ShowTick tick />
+                                        )}
                                     </h3>
-                                    <p className={cx('status')}>Đang hoạt động</p>
+                                    <p className={cx('status')}>
+                                        Đang hoạt động
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Messages */}
                         <div className={cx('messages-container')}>
                             <div className={cx('messages-list')}>
-                                {messages.map((message) => (
+                                {messages.map(message => (
                                     <MessageBubble
                                         key={message.id}
                                         message={message}
-                                        isSender={message.senderId === currentUser.id}
+                                        isSender={
+                                            message.senderId === currentUser.id
+                                        }
                                     />
                                 ))}
                                 <div ref={messagesEndRef} />
                             </div>
                         </div>
 
-                        {/* Input */}
                         <div className={cx('input-container')}>
                             <button className={cx('emoji-btn')}>
-                                <SvgIcon icon={iconEmojiSmile} size={24} />
+                                <SvgIcon
+                                    icon={iconEmojiSmile}
+                                    size={24}
+                                />
                             </button>
                             <input
                                 ref={inputRef}
@@ -177,12 +341,16 @@ function Messages() {
                                 type="text"
                                 placeholder="Gửi tin nhắn..."
                                 value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
+                                onChange={(e) =>
+                                    setInputValue(e.target.value)
+                                }
                                 onKeyPress={handleKeyPress}
                             />
                             {inputValue.trim() && (
                                 <button
-                                    className={cx('send-btn', { active: inputValue.trim() })}
+                                    className={cx('send-btn', {
+                                        active: true,
+                                    })}
                                     onClick={handleSendMessage}
                                 >
                                     <SvgIcon icon={iconSend} size={20} />

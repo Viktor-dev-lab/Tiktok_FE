@@ -47,12 +47,17 @@ function ChatItem({ chatInfo }) {
                             {user.isVerified && <ShowTick tick={true} />}
                         </h4>
                     </div>
-                    <span className={cx('time')}>{formatTime(lastMessage.createdAt)}</span>
+                    <span className={cx('time')}>
+                        {lastMessage?.createdAt
+                            ? formatTime(lastMessage.createdAt)
+                            : ''}
+                    </span>
                 </div>
                 <div className={cx('message-wrapper')}>
                     <p className={cx('last-message', { unread: unreadCount > 0 })}>
-                        {lastMessage.content}
+                        {lastMessage?.content || 'Bắt đầu cuộc trò chuyện'}
                     </p>
+
                     {unreadCount > 0 && <span className={cx('unread-badge')}>{unreadCount}</span>}
                 </div>
             </div>
