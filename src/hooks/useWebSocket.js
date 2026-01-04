@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import websocketService from '~/services/websocketService';
 import { useAuth } from '~/Context/AuthContext';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 /**
  * Custom hook để quản lý WebSocket connection và notifications
@@ -49,7 +50,7 @@ function useWebSocket() {
 
     // Hàm like video - luôn dùng REST API (backend không có WebSocket endpoint)
     const likeVideo = useCallback((videoId, likerId) => {
-        return fetch(`http://localhost:8080/api/videos/${videoId}/like?liker_id=${likerId}`, {
+        return fetch(`${API_BASE_URL}/videos/${videoId}/like?liker_id=${likerId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ function useWebSocket() {
 
     // Hàm unlike video - luôn dùng REST API (backend không có WebSocket endpoint)
     const unlikeVideo = useCallback((videoId, likerId) => {
-        return fetch(`http://localhost:8080/api/videos/${videoId}/like?liker_id=${likerId}`, {
+        return fetch(`${API_BASE_URL}/videos/${videoId}/like?liker_id=${likerId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

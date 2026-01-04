@@ -9,6 +9,7 @@ import config from '~/configs';
 import { useAuth } from '~/Context/AuthContext';
 
 const cx = classNames.bind(styles);
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function Upload() {
     const navigate = useNavigate();
@@ -68,7 +69,7 @@ function Upload() {
                 formData.append('description', caption);
             }
 
-            const res = await fetch('http://localhost:8080/api/videos', {
+            const res = await fetch(`${API_BASE_URL}/videos`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token') || ''}`,

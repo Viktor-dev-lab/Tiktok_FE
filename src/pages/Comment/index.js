@@ -16,7 +16,7 @@ import { iconHeart } from '~/components/SvgIcon/iconsRepo';
 import ShowTick from '~/components/ShowTick';
 
 const cx = classNames.bind(styles);
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function Comment() {
     const { videoId } = useParams();
