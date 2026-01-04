@@ -1,6 +1,6 @@
 // src/utils/authUtils.js
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Lưu token vào localStorage
 export const setAuthToken = (token) => {
@@ -41,7 +41,7 @@ export const getCurrentUser = async () => {
 // Login function
 export const login = async (email, password) => {
     try {
-        const res = await fetch('http://localhost:8080/api/auth/login', {
+        const res = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })

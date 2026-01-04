@@ -10,6 +10,7 @@ import assetImages from '~/assets/images';
 // import SvgIcon from '~/components/SvgIcon';
 import VideoContext from '~/Context/VideoContext';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const cx = classNames.bind(styles);
 
 function Home() {
@@ -100,7 +101,7 @@ function Home() {
                     headers.Authorization = `Bearer ${token}`;
                 }
 
-                const res = await fetch('http://localhost:8080/api/videos', {
+                const res = await fetch(`${API_BASE_URL}/videos`, {
                     method: 'GET',
                     headers,
                 });

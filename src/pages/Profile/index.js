@@ -15,6 +15,7 @@ import assetImages from '~/assets/images';
 import { useAuth } from '~/Context/AuthContext';
 
 const cx = classNames.bind(styles);
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function Profile() {
     const { currentUser } = useAuth();
@@ -33,7 +34,7 @@ function Profile() {
             try {
                 setLoading(true);
                 const res = await fetch(
-                    `http://localhost:8080/api/videos/user/${currentUser.id}`,
+                    `${API_BASE_URL}/videos/user/${currentUser.id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -89,7 +90,7 @@ function Profile() {
                     <div className={cx('basic')}>
                         <Image 
                             className={cx('avatar')} 
-                            src={profileUser.avatar} 
+                            src={assetImages.avartar} 
                             alt={profileUser.nickname} 
                         />
                         <div className={cx('text')}>
